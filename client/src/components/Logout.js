@@ -8,6 +8,8 @@ function Logout() {
   useEffect(() => {
     // Clear the admin data from localStorage on logout
     localStorage.removeItem("adminname");
+    localStorage.removeItem("token");
+
 
     // Redirect to the homepage or login page
     navigate("/");

@@ -1,9 +1,13 @@
-import React, { useContext } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { store } from "../App";
 
 function Navbar() {
-  const { adminName } = useContext(store);
+  const [adminName, setAdminName] = useState("");
+
+  useEffect(() => {
+    setAdminName(localStorage.getItem("adminname"));
+  }, []);
   return (
     <nav className="navbar navbar-expand-lg d-flex">
       <div className="container-fluid">
@@ -25,7 +29,7 @@ function Navbar() {
           </li>
           <li className="nav-item">
             {/* If you want to display the admin name */}
-            <span className="nav-link">{adminName || "Admin"}</span>
+            <span className="nav-link">{adminName}</span>
           </li>
         </ul>
       </div>

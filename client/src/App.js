@@ -14,21 +14,15 @@ export const store = createContext();
 
 function App() {
   const [token, setToken] = useState(null);
-  const [adminName, setAdminName] = useState(
-    localStorage.getItem("adminname") || ""
-  ); // Initialize with localStorage value
 
   // To update adminName when it changes
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     setToken(storedToken);
-
-    const adminname = localStorage.getItem("adminname");
-    setAdminName(adminname || ""); // Update adminName based on localStorage
   }, []);
 
   return (
-    <store.Provider value={{ token, setToken, adminName }}>
+    <store.Provider value={{ token, setToken }}>
       <Router>
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -40,6 +34,7 @@ function App() {
           <Route path="/employeeslist" element={<EmployeeList />} />
           <Route path="/employeeedit" element={<EmployeeEdit />} />
           <Route path="/employeeedit/:id" element={<EmployeeEdit />} />
+          <Route path="/employeelist/:name" element={<EmployeeList />} />
           <Route path="/logout" element={<Logout />} />
         </Routes>
       </Router>

@@ -14,7 +14,8 @@ app.use(express.json());
 app.use(cors({ origin: "*" }));
 
 // MongoDB connection
-mongoose.connect(process.env.MONGO_URI)
+mongoose
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("DB CONNECTED"))
   .catch((err) => console.log("DB CONNECTION ERROR:", err));
 
@@ -30,48 +31,50 @@ const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: "employees",
-    allowed_formats: ["jpg", "jpeg", "png"]
-  }
+    allowed_formats: ["jpg", "jpeg", "png"],
+  },
 });
 const upload = multer({ storage });
 
 // Register user route
-app.post('/register', async (req, res) => {
-    try {
-      console.log(req.body); // Log the incoming request body
-  
-      const { username, email, password, confirmpassword } = req.body;
-  
-      // Check if all fields are present
-      if (!username || !email || !password || !confirmpassword) {
-        return res.status(400).json({ error: "All fields are required" });
-      }
-  
-      const newUser = new Registeruser({
-        username,
-        email,
-        password,
-        confirmpassword
-      });
-  
-      await newUser.save();
-      res.status(201).json({ message: "User registered successfully" });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Failed to register user" });
+app.post("/register", async (req, res) => {
+  try {
+    console.log(req.body); // Log the incoming request body
+
+    const { username, email, password, confirmpassword } = req.body;
+
+    // Check if all fields are present
+    if (!username || !email || !password || !confirmpassword) {
+      return res.status(400).json({ error: "All fields are required" });
     }
-  });
-  
+
+    const newUser = new Registeruser({
+      username,
+      email,
+      password,
+      confirmpassword,
+    });
+
+    await newUser.save();
+    res.status(201).json({ message: "User registered successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to register user" });
+  }
+});
 
 // Login route
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await Registeruser.findOne({ email });
-    if (!user || user.password !== password) return res.status(400).json({ error: "Invalid Credentials" });
+    if (!user || user.password !== password)
+      return res.status(400).json({ error: "Invalid Credentials" });
 
     const payload = { user: { id: user.id } };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
     res.json({ token });
   } catch (error) {
     console.error(error);
@@ -85,7 +88,15 @@ app.post("/createemployee", upload.single("image"), async (req, res) => {
   const image = req.file ? req.file.path : null;
 
   try {
-    const newEmployee = new CreateEmployee({ name, email, mobile, designation, gender, course, image });
+    const newEmployee = new CreateEmployee({
+      name,
+      email,
+      mobile,
+      designation,
+      gender,
+      course,
+      image,
+    });
     await newEmployee.save();
     res.status(200).json({ message: "Employee created successfully!" });
   } catch (error) {
@@ -94,14 +105,25 @@ app.post("/createemployee", upload.single("image"), async (req, res) => {
   }
 });
 
-// Get all employees route
 app.get("/employeelist", async (req, res) => {
   try {
-    const employees = await CreateEmployee.find();
-    if (!employees.length) return res.status(404).json({ error: "No employees found" });
+    // Extract sortField and sortOrder from query parameters, with default values
+    const { sortField = "name", sortOrder = "asc" } = req.query;
+
+    // Determine sorting order (1 for ascending, -1 for descending)
+    const order = sortOrder === "desc" ? -1 : 1;
+
+    // Fetch employees from the database with sorting
+    const employees = await CreateEmployee.find().sort({ [sortField]: order });
+
+    // Check if employees exist
+    if (!employees.length) {
+      return res.status(404).json({ error: "No employees found" });
+    }
+
     res.status(200).json({ data: employees });
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching employee data:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -109,11 +131,32 @@ app.get("/employeelist", async (req, res) => {
 // Update employee route
 app.put("/employeelist/:id", async (req, res) => {
   const { id } = req.params;
-  const updatedData = req.body;
+  const { name, email, mobile, designation, gender, course, image } = req.body;
+  const updatedData = {
+    name,
+    email,
+    mobile,
+    designation,
+    gender,
+    course,
+    image,
+  };
+  console.log(id, updatedData, "updated data.....");
 
   try {
-    const updatedEmployee = await CreateEmployee.findByIdAndUpdate(id, updatedData, { new: true });
-    if (!updatedEmployee) return res.status(404).json({ error: "Employee not found" });
+    const updatedEmployee = await CreateEmployee.findByIdAndUpdate(
+      id,
+      updatedData,
+      {
+        new: true, // Return the updated document
+        runValidators: true, // Ensure validation rules are applied
+      }
+    );
+
+    if (!updatedEmployee) {
+      return res.status(404).json({ error: "Employee not found" });
+    }
+
     res.status(200).json(updatedEmployee);
   } catch (error) {
     console.error(error);
@@ -124,9 +167,12 @@ app.put("/employeelist/:id", async (req, res) => {
 // Delete employee route
 app.delete("/employeelist/:id", async (req, res) => {
   const { id } = req.params;
+
   try {
     const deletedEmployee = await CreateEmployee.findByIdAndDelete(id);
-    if (!deletedEmployee) return res.status(404).json({ error: "Employee not found" });
+    if (!deletedEmployee) {
+      return res.status(404).json({ error: "Employee not found" });
+    }
     res.status(200).json({ message: "Employee deleted successfully" });
   } catch (error) {
     console.error(error);
@@ -134,26 +180,50 @@ app.delete("/employeelist/:id", async (req, res) => {
   }
 });
 
-
+// Update single employee route
 app.put("/employeeedit/:id", async (req, res) => {
-    try {
-      const { id } = req.params; // Get employee ID from params
-      const updatedData = req.body; // Get updated data from the request body
-      
-      // Find employee by ID and update the employee details
-      const updatedEmployee = await CreateEmployee.findByIdAndUpdate(id, updatedData, { new: true });
-      
-      if (!updatedEmployee) {
-        return res.status(404).json({ error: "Employee not found" });
+  try {
+    const { id } = req.params;
+    const updatedData = req.body;
+
+    const updatedEmployee = await CreateEmployee.findByIdAndUpdate(
+      id,
+      updatedData,
+      {
+        new: true, // Return the updated document
+        runValidators: true, // Ensure validation rules are applied
       }
-      
-      // Return the updated employee
-      res.status(200).json(updatedEmployee);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Server error" });
+    );
+
+    if (!updatedEmployee) {
+      return res.status(404).json({ error: "Employee not found" });
     }
-  });
+
+    res.status(200).json(updatedEmployee);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Get single employee for edit
+app.get("/employeeedit/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const employee = await CreateEmployee.findById(id);
+
+    if (!employee) {
+      return res.status(404).json({ error: "Employee not found" });
+    }
+
+    res.status(200).json(employee);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 
 
 // Protected route (user profile)

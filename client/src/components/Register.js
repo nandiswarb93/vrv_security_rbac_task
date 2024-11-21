@@ -35,14 +35,19 @@ const Register = () => {
     setError("");
 
     try {
-      const response = await axios.post("http://localhost:5000/register", {
-        username: formData.username,
-        email: formData.email,
-        password: formData.password,
-        confirmpassword: formData.confirmpassword,
-      });
+      const { data, status } = await axios.post(
+        "http://localhost:5000/register",
+        {
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+          confirmpassword: formData.confirmpassword, // Only send required fields
+        }
+      );
+     
+      navigate("/login");
 
-      if (response.status === 200) {
+      if (status === 200) {
         alert("Registration successful!");
         // Set adminname in localStorage after successful registration
         localStorage.setItem("adminname", formData.username);
@@ -54,12 +59,15 @@ const Register = () => {
           password: "",
           confirmpassword: "",
         });
+
         // Redirect to login page
-        navigate("/login");
       }
     } catch (err) {
-      setError("Registration failed. Please try again.");
-      console.error(err);
+      // Extract detailed error message
+      const errorMessage =
+        err.response?.data?.message || "Registration failed. Please try again.";
+      setError(errorMessage);
+      console.error("Error:", errorMessage);
     }
   };
 

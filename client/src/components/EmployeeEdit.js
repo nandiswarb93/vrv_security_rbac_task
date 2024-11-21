@@ -1,237 +1,3 @@
-// import React, { useState, useEffect } from "react";
-// import axios from "axios";
-// import { useNavigate, useParams } from "react-router-dom";
-// import Admin from "./Admin";
-
-// function EmployeeEdit() {
-//   const [employee, setEmployee] = useState({
-//     name: "",
-//     email: "",
-//     mobile: "",
-//     designation: "",
-//     gender: "",
-//     course: [],
-//     image: "",
-//   });
-
-//   const { id } = useParams(); // Get employee ID from the URL
-//   const navigate = useNavigate();
-
-//   useEffect(() => {
-//     fetchEmployeeData();
-//   }, [id]);
-
-//   // Fetch existing employee data by ID
-//   const fetchEmployeeData = async () => {
-//     try {
-//       const response = await axios.get(
-//         `http://localhost:5000/employeelist/${id}`
-//       );
-//       setEmployee(response.data);
-//     } catch (error) {
-//       console.error("Error fetching employee data:", error);
-//     }
-//   };
-
-//   // Handle form field changes
-//   const handleChange = (e) => {
-//     const { name, value, type, checked } = e.target;
-
-//     if (type === "checkbox") {
-//       const updatedCourses = checked
-//         ? [...employee.course, value]
-//         : employee.course.filter((course) => course !== value);
-//       setEmployee({ ...employee, course: updatedCourses });
-//     } else {
-//       setEmployee({ ...employee, [name]: value });
-//     }
-//   };
-
-//   // Handle image upload
-//   const handleImageChange = async (e) => {
-//     const file = e.target.files[0];
-//     if (!file) return;
-
-//     const formData = new FormData();
-//     formData.append("file", file);
-//     formData.append("upload_preset", "your_cloudinary_preset"); // Replace with your Cloudinary upload preset
-
-//     try {
-//       const uploadResponse = await axios.post(
-//         "https://api.cloudinary.com/v1_1/your_cloud_name/image/upload",
-//         formData
-//       );
-//       setEmployee({ ...employee, image: uploadResponse.data.secure_url });
-//     } catch (error) {
-//       console.error("Error uploading image:", error);
-//     }
-//   };
-
-//   // Handle form submission
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     try {
-//       // Send updated data to backend
-//       const response = await axios.put(
-//         `http://localhost:5000/employeelist/${id}`,
-//         employee
-//       );
-//       if (response.status === 200) {
-//         navigate("/employeelist"); // Redirect after successful update
-//         alert("updating");
-//       }
-//     } catch (error) {
-//       console.error("Error updating employee:", error);
-//       alert("not updating");
-//     }
-//   };
-
-//   return (
-//     <div>
-//       <Admin />
-//       <form onSubmit={handleSubmit} className="employee-form">
-//         <div className="form-group">
-//           <label htmlFor="name">Name</label>
-//           <input
-//             type="text"
-//             id="name"
-//             name="name"
-//             value={employee.name}
-//             onChange={handleChange}
-//             required
-//           />
-//         </div>
-
-//         <div className="form-group">
-//           <label htmlFor="email">Email</label>
-//           <input
-//             type="email"
-//             id="email"
-//             name="email"
-//             value={employee.email}
-//             onChange={handleChange}
-//             required
-//           />
-//         </div>
-
-//         <div className="form-group">
-//           <label htmlFor="mobile">Mobile No</label>
-//           <input
-//             type="text"
-//             id="mobile"
-//             name="mobile"
-//             value={employee.mobile}
-//             onChange={handleChange}
-//             required
-//           />
-//         </div>
-
-//         <div className="form-group">
-//           <label htmlFor="designation">Designation</label>
-//           <select
-//             id="designation"
-//             name="designation"
-//             value={employee.designation}
-//             onChange={handleChange}
-//             required
-//           >
-//             <option value="">Select Designation</option>
-//             <option value="HR">HR</option>
-//             <option value="Manager">Manager</option>
-//             <option value="Sales">Sales</option>
-//           </select>
-//         </div>
-
-//         <div className="form-group">
-//           <label>Gender</label>
-//           <div>
-//             <input
-//               type="radio"
-//               id="male"
-//               name="gender"
-//               value="Male"
-//               checked={employee.gender === "Male"}
-//               onChange={handleChange}
-//             />
-//             <label htmlFor="male">Male</label>
-//           </div>
-//           <div>
-//             <input
-//               type="radio"
-//               id="female"
-//               name="gender"
-//               value="Female"
-//               checked={employee.gender === "Female"}
-//               onChange={handleChange}
-//             />
-//             <label htmlFor="female">Female</label>
-//           </div>
-//         </div>
-
-//         <div className="form-group">
-//           <label>Course</label>
-//           <div>
-//             <input
-//               type="checkbox"
-//               id="mca"
-//               name="course"
-//               value="MCA"
-//               checked={employee.course.includes("MCA")}
-//               onChange={handleChange}
-//             />
-//             <label htmlFor="mca">MCA</label>
-//           </div>
-//           <div>
-//             <input
-//               type="checkbox"
-//               id="bca"
-//               name="course"
-//               value="BCA"
-//               checked={employee.course.includes("BCA")}
-//               onChange={handleChange}
-//             />
-//             <label htmlFor="bca">BCA</label>
-//           </div>
-//           <div>
-//             <input
-//               type="checkbox"
-//               id="bsc"
-//               name="course"
-//               value="BSC"
-//               checked={employee.course.includes("BSC")}
-//               onChange={handleChange}
-//             />
-//             <label htmlFor="bsc">BSC</label>
-//           </div>
-//         </div>
-
-//         <div className="form-group">
-//           <label htmlFor="image">Image Upload (JPG/PNG only)</label>
-//           <input
-//             type="file"
-//             id="image"
-//             name="image"
-//             onChange={handleImageChange}
-//           />
-//           {employee.image && (
-//             <img
-//               src={employee.image}
-//               alt="Employee"
-//               width="100"
-//               height="100"
-//               style={{ marginTop: "10px", borderRadius: "10px" }}
-//             />
-//           )}
-//         </div>
-
-//         <button type="submit">Submit</button>
-//       </form>
-//     </div>
-//   );
-// }
-
-// export default EmployeeEdit;
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
@@ -247,37 +13,51 @@ function EmployeeEdit() {
     course: [],
     image: "",
   });
-
+  console.log(employee, "employee");
   const { id } = useParams(); // Get employee ID from the URL
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchEmployeeData();
-  }, [id]);
-
-  // Fetch existing employee data by ID
-  const fetchEmployeeData = async () => {
+  // Fetch employee data by ID
+  const fetchEmployeeData = async (id) => {
     try {
-      const response = await axios.get(
-        `http://localhost:5000/employeelist/${id}`
+      const { data } = await axios.get(
+        `http://localhost:5000/employeeedit/${id}`
       );
-      setEmployee(response.data);
+      console.log(data, "response data");
+
+      const formattedData = {
+        ...data,
+        course: Array.isArray(data.course) ? data.course : [data.course],
+      };
+
+      setEmployee(formattedData); // Populate form with existing data
+      console.log(formattedData, "state data");
     } catch (error) {
       console.error("Error fetching employee data:", error);
+      alert("Failed to fetch employee details.");
     }
   };
 
-  // Handle form field changes
+  useEffect(() => {
+    if (id) fetchEmployeeData(id);
+  }, [id]);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    console.log(value, "checked value");
 
     if (type === "checkbox") {
-      const updatedCourses = checked
-        ? [...employee.course, value]
-        : employee.course.filter((course) => course !== value);
-      setEmployee({ ...employee, course: updatedCourses });
+      setEmployee((prevState) => ({
+        ...prevState,
+        course: checked
+          ? [...prevState.course, value] // Add course if checked
+          : prevState.course.filter((course) => course !== value), // Remove course if unchecked
+      }));
     } else {
-      setEmployee({ ...employee, [name]: value });
+      setEmployee((prevState) => ({
+        ...prevState,
+        [name]: value, // Update other fields
+      }));
     }
   };
 
@@ -288,7 +68,7 @@ function EmployeeEdit() {
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset", "your_cloudinary_preset"); // Replace with your Cloudinary upload preset
+    formData.append("upload_preset", "your_cloudinary_preset"); // Replace with your Cloudinary preset
 
     try {
       const uploadResponse = await axios.post(
@@ -298,33 +78,34 @@ function EmployeeEdit() {
       setEmployee({ ...employee, image: uploadResponse.data.secure_url });
     } catch (error) {
       console.error("Error uploading image:", error);
+      alert("Image upload failed.");
     }
   };
 
   // Handle form submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, id) => {
     e.preventDefault();
     try {
-      // Send updated data to backend
       const response = await axios.put(
         `http://localhost:5000/employeelist/${id}`,
         employee
       );
       if (response.status === 200) {
-        navigate("/employeelist"); // Redirect after successful update
-        alert("Updating successful");
+        alert("Employee updated successfully!");
+        navigate("/employeeslist"); // Redirect after successful update
       }
     } catch (error) {
       console.error("Error updating employee:", error);
-      alert("Update failed");
+      alert("Failed to update employee.");
     }
   };
 
   return (
-    <div className="container mt-4">
+    <div className="container m-0">
       <Admin />
       <h2 className="text-center mb-4">Edit Employee</h2>
-      <form onSubmit={handleSubmit} className="employee-form">
+      <form onSubmit={(e) => handleSubmit(e, id)} className="employee-form">
+        {/* Name */}
         <div className="mb-3">
           <label htmlFor="name" className="form-label">
             Name
@@ -340,6 +121,7 @@ function EmployeeEdit() {
           />
         </div>
 
+        {/* Email */}
         <div className="mb-3">
           <label htmlFor="email" className="form-label">
             Email
@@ -355,6 +137,7 @@ function EmployeeEdit() {
           />
         </div>
 
+        {/* Mobile */}
         <div className="mb-3">
           <label htmlFor="mobile" className="form-label">
             Mobile No
@@ -370,6 +153,7 @@ function EmployeeEdit() {
           />
         </div>
 
+        {/* Designation */}
         <div className="mb-3">
           <label htmlFor="designation" className="form-label">
             Designation
@@ -389,6 +173,7 @@ function EmployeeEdit() {
           </select>
         </div>
 
+        {/* Gender */}
         <div className="mb-3">
           <label className="form-label">Gender</label>
           <div className="form-check form-check-inline">
@@ -421,52 +206,31 @@ function EmployeeEdit() {
           </div>
         </div>
 
+        {/* Courses */}
         <div className="mb-3">
           <label className="form-label">Courses</label>
-          <div className="form-check">
-            <input
-              type="checkbox"
-              id="mca"
-              name="course"
-              value="MCA"
-              className="form-check-input"
-              checked={employee.course.includes("MCA")}
-              onChange={handleChange}
-            />
-            <label htmlFor="mca" className="form-check-label">
-              MCA
-            </label>
-          </div>
-          <div className="form-check">
-            <input
-              type="checkbox"
-              id="bca"
-              name="course"
-              value="BCA"
-              className="form-check-input"
-              checked={employee.course.includes("BCA")}
-              onChange={handleChange}
-            />
-            <label htmlFor="bca" className="form-check-label">
-              BCA
-            </label>
-          </div>
-          <div className="form-check">
-            <input
-              type="checkbox"
-              id="bsc"
-              name="course"
-              value="BSC"
-              className="form-check-input"
-              checked={employee.course.includes("BSC")}
-              onChange={handleChange}
-            />
-            <label htmlFor="bsc" className="form-check-label">
-              BSC
-            </label>
-          </div>
+          {["MCA", "BCA", "BSC"].map((course) => (
+            <div className="form-check" key={course}>
+              <input
+                type="checkbox"
+                id={course.toLowerCase()}
+                name="course"
+                value={course}
+                className="form-check-input"
+                checked={employee.course.includes(course)}
+                onChange={handleChange}
+              />
+              <label
+                htmlFor={course.toLowerCase()}
+                className="form-check-label"
+              >
+                {course}
+              </label>
+            </div>
+          ))}
         </div>
 
+        {/* Image Upload */}
         <div className="mb-3">
           <label htmlFor="image" className="form-label">
             Image Upload (JPG/PNG only)

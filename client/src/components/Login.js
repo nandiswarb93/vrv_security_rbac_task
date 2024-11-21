@@ -39,6 +39,7 @@ const Login = () => {
         // Store the token in context and localStorage
         setToken(receivedToken);
         localStorage.setItem("token", receivedToken);
+        localStorage.setItem("adminname", loginData.email);
 
         alert("Login successful!");
         // Clear the form fields
