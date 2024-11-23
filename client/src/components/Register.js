@@ -36,7 +36,7 @@ const Register = () => {
 
     try {
       const { data, status } = await axios.post(
-        "http://localhost:5000/register",
+        "https://vrv-security-rbac-task.onrender.com/register",
         {
           username: formData.username,
           email: formData.email,
