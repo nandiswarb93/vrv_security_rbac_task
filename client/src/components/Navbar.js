@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { store } from "../App";
 
 function Navbar() {
   const [adminName, setAdminName] = useState("");
