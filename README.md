@@ -28,7 +28,7 @@ backend packages :
 
 [and actualli i have deployed successfully ]
 
-[demp link is : https://vrv-security-rbac-task-frontend.onrender.com/ ]
+[demo link is : https://vrv-security-rbac-task-frontend.onrender.com/ ]
 #####
 
 login with email :  admin@gmail.com  and password : 123 
