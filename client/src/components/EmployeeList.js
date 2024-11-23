@@ -21,7 +21,7 @@ function EmployeeList() {
   const fetchData = async () => {
     try {
       const { data, status } = await axios.get(
-        `http://localhost:5000/employeelist?sortField=${sortField}&sortOrder=${sortOrder}`
+        `https://vrv-security-rbac-task.onrender.com/employeelist?sortField=${sortField}&sortOrder=${sortOrder}`
       );
       if (status === 200) {
         setList(data.data);
@@ -50,7 +50,7 @@ function EmployeeList() {
   const handleDelete = async (id) => {
     try {
       const { status } = await axios.delete(
-        `http://localhost:5000/employeelist/${id}`
+        `https://vrv-security-rbac-task.onrender.com/employeelist/${id}`
       );
       if (status === 200) {
         setList((prevList) =>
